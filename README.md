@@ -1,1 +1,1 @@
-A little helper script
+A little helper script with SQLite source
