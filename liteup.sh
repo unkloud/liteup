@@ -3,15 +3,17 @@
 set -euo pipefail
 
 TMP_DIR=$(mktemp -d)
-# trap 'rm -rf "$TMP_DIR"' EXIT
+trap 'rm -rf "$TMP_DIR"' EXIT
 
 declare -A SQLITE_VERSIONS=(
+    ["3.5.1"]="3500100"
     ["3.5.0"]="3500000"
     ["3.49.2"]="3490200"
     ["3.49.1"]="3490100"
 )
 
 declare -A SQLITE_YEARS=(
+    ["3.5.1"]="2025"
     ["3.5.0"]="2025"
     ["3.49.2"]="2025"
     ["3.49.1"]="2025"
