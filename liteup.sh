@@ -3,6 +3,9 @@
 set -euo pipefail
 
 readonly TMP_DIR="$(mktemp -d)"
+readonly VER_FILE=".sqlite_ver"
+readonly DEFAULT_DEST="src"
+
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 declare -Ar SQLITE_VERSIONS=(
@@ -30,6 +33,25 @@ die() {
     exit 1
 }
 
+check_existing_version() {
+    local version="$1"
+    local dest_dir="$2"
+    local ver_file="$dest_dir/$VER_FILE"
+
+    # Return early if no version file exists
+    [[ -f "$ver_file" ]] || return 0
+
+    # Check version match
+    local existing_version
+    existing_version="$(head -n1 "$ver_file" 2>/dev/null || echo "")"
+    [[ "$existing_version" == "$version" ]] || return 0
+
+    # Check if SQLite files exist
+    if ls "$dest_dir"/*.c "$dest_dir"/*.h >/dev/null 2>&1; then
+        exit 0
+    fi
+}
+
 download_sqlite() {
     local version="$1"
     local num_ver="${SQLITE_VERSIONS[$version]:-}"
@@ -42,25 +64,40 @@ download_sqlite() {
         die "Download failed. Install curl or wget."
     mkdir -p "$extract"
     unzip -jq "$zip" -d "$extract" || die "Extract failed"
+    echo "$version" > "$extract/$VER_FILE"
     echo "$extract"
 }
 
-if [[ $# -lt 1 ]]; then
+validate_destination() {
+    local dest="$1"
+    [[ "$dest" != *..* && "$dest" != /* ]] || die "Invalid destination: $dest"
+}
+
+clean_destination() {
+    local dest="$1"
+    [[ -d "$dest" ]] || return 0
+    find "$dest" -maxdepth 1 \( -name "*.c" -o -name "*.h" -o -name "$VER_FILE" \) -delete
+}
+
+install_files() {
+    local src_dir="$1"
+    local dest_dir="$2"
+    mkdir -p "$dest_dir"
+    clean_destination "$dest_dir"
+    install -m 644 "$src_dir"/*.{c,h} "$dest_dir"/ 2>/dev/null ||
+        die "No SQLite files found or install failed"
+    install -m 644 "$src_dir/$VER_FILE" "$dest_dir"/ ||
+        die "Failed to install version file"
+}
+
+version="${1:-}"
+dest="${2:-$DEFAULT_DEST}"
+[[ -n "$version" ]] || {
     echo "Usage: $0 <version> [dir]" >&2
     display_supported_versions
     exit 1
-fi
-
-dest="${2:-src}"
-[[ "$dest" != *..* && "$dest" != /* ]] || die "Invalid destination"
-
-src_dir="$(download_sqlite "$1")"
-mkdir -p "$dest"
-
-# Safe cleanup: only remove SQLite files
-if [[ -d "$dest" ]]; then
-    find "$dest" -maxdepth 1 -name "*.c" -o -name "*.h" | xargs -r rm -f
-fi
-
-install -m 644 "$src_dir"/*.{c,h} "$dest"/ 2>/dev/null ||
-    die "No SQLite files found or install failed"
+}
+validate_destination "$dest"
+check_existing_version "$version" "$dest"
+src_dir="$(download_sqlite "$version")"
+install_files "$src_dir" "$dest"
