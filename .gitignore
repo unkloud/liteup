@@ -1,2 +1,6 @@
 src/
 .sqlite_ver
+.idea/
+bin/
+build/
+lib/
