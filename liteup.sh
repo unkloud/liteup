@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+# shellcheck disable=SC2155
 readonly TMP_DIR="$(mktemp -d)"
 readonly VER_FILE=".sqlite_ver"
 readonly DEFAULT_DEST="src"
@@ -75,8 +76,15 @@ download_sqlite() {
 }
 
 validate_destination() {
-    local dest="$1"
-    [[ "$dest" != *..* && "$dest" != /* ]] || die "Invalid destination: $dest"
+    local dest="$1" abs=""
+    [[ -n "$dest" ]] || die "Destination must not be empty"
+    [[ "$dest" != "." && "$dest" != "/" ]] || die "Invalid destination: $dest"
+    [[ "$dest" != /* ]] || die "Absolute paths are not allowed: $dest"
+    [[ "$dest" != *..* ]] || die "Parent directory references are not allowed in destination: $dest"
+    if [[ -d "$dest" ]]; then
+        abs="$(cd "$dest" && pwd)"
+        [[ "$abs" != "$PWD" ]] || die "Refusing to operate on repository root"
+    fi
 }
 
 clean_destination() {
