@@ -74,5 +74,11 @@ $(BIN_DIR)/sqlite3: $(SHELL_C) $(BUILD_DIR)/sqlite3.o | $(BIN_DIR)
 	@echo Built $@
 
 clean:
-	@rm -rf $(BUILD_DIR) $(BIN_DIR) $(LIB_DIR)
-	@echo Cleaned
+	@set -e; \
+	for d in "$(BUILD_DIR)" "$(BIN_DIR)" "$(LIB_DIR)"; do \
+	  case "$$d" in \
+	    ""|"/"|"."|".."|"./"|"../"|/*) echo "Refusing to clean unsafe dir: '$$d'" >&2; exit 1;; \
+	  esac; \
+	done; \
+	rm -rf "$(BUILD_DIR)" "$(BIN_DIR)" "$(LIB_DIR)"; \
+	echo Cleaned

@@ -6,6 +6,7 @@ Overview
   - sqlite3 CLI (requires shell.c)
   - Shared library
   - Static library
+- litebuild.sh: helper to build and place artifacts into a chosen directory.
 
 Quick start
 
@@ -28,7 +29,7 @@ Targets
 - shared: builds the dynamic library
 - static: builds libsqlite3.a
 - cli: builds the shell, linking against readline and curses (ncurses on Linux; curses on macOS)
-- clean: removes build artifacts (bin/, lib/, build/)
+- clean: removes build artifacts (bin/, lib/, build/) with safety checks (refuses unsafe directories)
 
 Variables
 - SRC_DIR: source directory (default: src)
@@ -49,6 +50,21 @@ Examples
 - make shared
 - make static
 - CLI_LIBS="-lreadline -lncursesw" make cli
+
+Safety
+- liteup.sh refuses unsafe destinations (no absolute paths, no '.', '/', or parent references).
+- Makefile clean refuses unsafe directories (absolute paths, root, '.', empty).
+
+litebuild.sh
+- Usage: ./litebuild.sh <src_dir> <bin|dll|static> <dest_dir>
+- Examples:
+  - ./litebuild.sh src dll out            # builds libsqlite3.(so|dylib) into ./out
+  - ./litebuild.sh src static dist        # builds libsqlite3.a into ./dist
+  - ./litebuild.sh src bin ./artifacts    # builds sqlite3 CLI into ./artifacts (requires shell.c)
+- Notes:
+  - The src_dir should contain sqlite3.c (and shell.c for bin).
+  - Artifacts are written directly into dest_dir.
+  - Safety: refuses to use '/' as destination.
 
 Notes
 - The amalgamation zip from sqlite.org contains sqlite3.c, sqlite3.h, sqlite3ext.h. It does not contain shell.c.
