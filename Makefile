@@ -80,5 +80,4 @@ clean:
 	    ""|"/"|"."|".."|"./"|"../"|/*) echo "Refusing to clean unsafe dir: '$$d'" >&2; exit 1;; \
 	  esac; \
 	done; \
-	rm -rf "$(BUILD_DIR)" "$(BIN_DIR)" "$(LIB_DIR)"; \
-	echo Cleaned
+	rm -rf "$(BUILD_DIR)" "$(BIN_DIR)" "$(LIB_DIR)";

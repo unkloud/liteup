@@ -11,6 +11,16 @@ die() {
     exit 1
 }
 
+abspath() {
+    # If path is absolute, print as-is; otherwise prefix with PWD
+    local p
+    p="$1"
+    case "$p" in
+        /*) printf '%s\n' "$p" ;;
+        *) printf '%s\n' "$PWD/$p" ;;
+    esac
+}
+
 main() {
     local src type dest target script_dir build_dir
 
@@ -23,6 +33,9 @@ main() {
         static) target="static" ;;
         *) die "Invalid build type '$type'. Expected one of: bin, dll, static" ;;
     esac
+
+    src="$(abspath "$src")"
+    dest="$(abspath "$dest")"
 
     [[ -d "$src" ]] || die "Source dir not found: $src"
     [[ "$dest" != "/" ]] || die "Destination cannot be the root directory '/'"

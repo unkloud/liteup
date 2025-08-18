@@ -62,6 +62,7 @@ litebuild.sh
   - ./litebuild.sh src static dist        # builds libsqlite3.a into ./dist
   - ./litebuild.sh src bin ./artifacts    # builds sqlite3 CLI into ./artifacts (requires shell.c)
 - Notes:
+  - <src_dir> and <dest_dir> may be absolute or relative. If relative, they are resolved against the current working directory (PWD) and the Makefile receives the full absolute paths.
   - The src_dir should contain sqlite3.c (and shell.c for bin).
   - Artifacts are written directly into dest_dir.
   - Safety: refuses to use '/' as destination.
