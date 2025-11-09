@@ -9,6 +9,7 @@ readonly DEFAULT_DEST="src"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 declare -Ar SQLITE_VERSIONS=(
+    ["3.51.0"]="3510000"
     ["3.5.4"]="3500400"
     ["3.5.3"]="3500300"
     ["3.5.2"]="3500200"
@@ -19,6 +20,7 @@ declare -Ar SQLITE_VERSIONS=(
 )
 
 declare -Ar SQLITE_YEARS=(
+    ["3.51.0"]="2025"
     ["3.5.4"]="2025"
     ["3.5.3"]="2025"
     ["3.5.2"]="2025"
